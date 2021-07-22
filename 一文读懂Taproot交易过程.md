@@ -14,7 +14,7 @@ Taproot的核心是由Schnorr 签名和MAST抽象语法树组成，而Taproot交
 
 从上图可以看出聚合公钥的生成过程可以分三步：1）相互传递公钥，并对所有公钥拼接进行一次聚合hash，生成c_all。  2）c_all和i的公钥拼接hash后生成因子c_i。  3) 根据因子c_i进行线性组合得到聚合公钥P_agg。
 
-![image-20210722091644213](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722091644213.png)
+![image-20210722091644213](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722091644213.png?raw=true)
 
 ### 聚合签名
 
@@ -22,7 +22,7 @@ Taproot的核心是由Schnorr 签名和MAST抽象语法树组成，而Taproot交
 
 聚合签名的生成过程上图显示需要进行三轮通信，主要分成两大步：1）生成nonce并线性聚合生成R_agg  2）各方利用私钥生成Schnorr签名并进行聚合，得到最终的聚合签名（R_agg, s1+s2+s3）
 
-![image-20210722091724750](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722091724750.png)
+![image-20210722091724750](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722091724750.png?raw=true)
 
 ### 引入MAST抽象语法树
 
@@ -32,27 +32,27 @@ Taproot的核心是由Schnorr 签名和MAST抽象语法树组成，而Taproot交
 
 1. alice,bob和charlie各自生成公私钥。
 
-   ![image-20210722092748689](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722092748689.png)
+   ![image-20210722092748689](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722092748689.png?raw=true)
 
 2. 公钥聚合成pubkey_agg，并调整私钥，用于以后的签名。
 
-   ![image-20210722092816042](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722092816042.png)
+   ![image-20210722092816042](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722092816042.png?raw=true)
 
 3. 创建脚本script_A,script_B,script_C
 
-   ![image-20210722092854675](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722092854675.png)
+   ![image-20210722092854675](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722092854675.png?raw=true)
 
 4. 构建MAST抽象语法树，计算MAST结构对应的私钥taptweak。上图中TaggedHash表示带标签的hash,固定长度32字节，计算方式是TaggedHash(tag, x) = sha256(sha256(tag) + sha256(tag) + x)；ver表示Tapscript版本号，当前值为0xc0；size表示scirpt的字节数；A&B表示A,B字典排序后按字节拼接。
 
-   ![image-20210722092920158](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722092920158.png)
+   ![image-20210722092920158](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722092920158.png?raw=true)
 
 4. 根据公式Q=P+tG合成taproot公钥,并生成segwit_address用于下文交易。
 
-   ![image-20210722092943482](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722092943482.png)
+   ![image-20210722092943482](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722092943482.png?raw=true)
 
 5. 向Taproot地址转账50个btc
 
-   ![image-20210722093015597](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093015597.png)
+   ![image-20210722093015597](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093015597.png?raw=true)
 
 ## Taproot花费
 
@@ -60,23 +60,23 @@ Taproot的核心是由Schnorr 签名和MAST抽象语法树组成，而Taproot交
 
 1. 创建交易原文，填充接受方地址，转账数量等数据。
 
-   ![image-20210722093042214](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093042214.png)
+   ![image-20210722093042214](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093042214.png?raw=true)
 
 2. 按照第一种方式进行转账，首先需要alice，bob，charlie各自生成nonce并进行聚合，然后各自利用私钥进行Schnorr签名，最后进行签名的聚合操作。因此，这种方式最终的见证脚本是一个单独的签名,固定长度64字节。
 
-   ![image-20210722093114659](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093114659.png)
+   ![image-20210722093114659](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093114659.png?raw=true)
 
 3. 测试第一种花费组建的交易原文合法并发送交易
 
-   ![image-20210722093202683](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093202683.png)
+   ![image-20210722093202683](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093202683.png?raw=true)
 
 4. 按照第二种方式进行转账，假设是alice通过script_A完成向bob的转账，那么见证脚本需要包括：1）`[Stack element(s) satisfying TapScript_A]` 2）`[TapScript_A]` 3）`[Controlblock c]`。其中`[Controlblock c]`表示的是`TapScript_A`相关的proof,长度为33+32n。33个字节中的首字节是聚合公钥和Taproot版本号共同计算得出，剩下32个字节表示的是聚合公钥的x坐标。32n表示的是`TapScript_A`的proof，在本例中n=2，指的是`taggedhash_leafB`和`taggedhash_leafC`。
 
-   ![image-20210722093350335](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093350335.png)
+   ![image-20210722093350335](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093350335.png?raw=true)
 
 5. 测试第二种花费组建的交易原文合法并发送交易
 
-   ![image-20210722093409770](/Users/daiwei/Library/Application Support/typora-user-images/image-20210722093409770.png)
+   ![image-20210722093409770](https://github.com/AAweidai/PictureBed/blob/master/taproot/image-20210722093409770.png?raw=true)
 
 ## 总结
 
